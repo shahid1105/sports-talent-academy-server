@@ -29,9 +29,12 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
 
+        const instructorsCollection = client.db("sportsDb").collection("instructors");
 
-
-
+        app.get("/instructors", async (req, res) => {
+            const result = await instructorsCollection.find().toArray();
+            res.send(result)
+        })
 
 
 
