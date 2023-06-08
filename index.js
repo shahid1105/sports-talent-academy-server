@@ -31,6 +31,7 @@ async function run() {
 
         const instructorsCollection = client.db("sportsDb").collection("instructors");
         const classesCollection = client.db("sportsDb").collection("classes");
+        const selectedClassCollection = client.db("sportsDb").collection("selected-class");
 
         // instructors api
         app.get("/instructors", async (req, res) => {
@@ -41,6 +42,15 @@ async function run() {
         // classes api
         app.get('/classes', async (req, res) => {
             const result = await classesCollection.find().toArray();
+            res.send(result)
+        })
+
+
+        // selected class collection related
+        app.post('/class-cart', async (req, res) => {
+            const item = req.body;
+
+            const result = await selectedClassCollection.insertOne(item);
             res.send(result)
         })
 
