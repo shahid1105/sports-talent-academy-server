@@ -15,7 +15,7 @@ app.use(express.json())
 const verifyJwt = (req, res, next) => {
     const authorization = req.headers.authorization;
     if (!authorization) {
-        return res.status(401).send({ error: true, message: 'unauthorize access' })
+        return res.status(401).send({ error: true, message: 'unauthorize access user' })
     }
 
     // bearer token [bearer, token] 
@@ -72,8 +72,6 @@ async function run() {
         })
 
 
-
-
         app.post('/users', async (req, res) => {
             const user = req.body;
 
@@ -88,6 +86,24 @@ async function run() {
             const result = await usersCollection.insertOne(user);
             res.send(result)
         })
+
+
+        app.get('/users/admin/:email', verifyJwt, async (req, res) => {
+            const email = req.params.email;
+
+            if (req.decoded.email !== email) {
+                res.send({ admin: false })
+
+            }
+
+            const query = { email: email }
+            const user = await usersCollection.findOne(query);
+            const result = { admin: user?.role === 'admin' }
+            res.send(result)
+        })
+
+
+
 
         app.patch('/users/vip/:id', async (req, res) => {
             const id = req.params.id;
