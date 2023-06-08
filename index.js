@@ -47,6 +47,20 @@ async function run() {
 
 
         // selected class collection related
+
+        app.get('/class-carts', async (req, res) => {
+            const email = req.query.email;
+
+            if (!email) {
+                res.send([]);
+            }
+
+            const query = { email: email };
+            const result = await selectedClassCollection.find(query).toArray();
+            res.send(result)
+        })
+
+
         app.post('/class-cart', async (req, res) => {
             const item = req.body;
 
