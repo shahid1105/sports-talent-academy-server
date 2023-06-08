@@ -29,9 +29,22 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
 
+        const usersCollection = client.db("sportsDb").collection("users");
         const instructorsCollection = client.db("sportsDb").collection("instructors");
         const classesCollection = client.db("sportsDb").collection("classes");
         const selectedClassCollection = client.db("sportsDb").collection("selected-class");
+
+
+        // Users Related APIs
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            const result = await usersCollection.insertOne(user);
+            res.send(result)
+        })
+
+
+
+
 
         // instructors api
         app.get("/instructors", async (req, res) => {
