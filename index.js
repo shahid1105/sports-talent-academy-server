@@ -211,6 +211,14 @@ async function run() {
         })
 
 
+        // payment history api 
+        app.get('/payment-history', verifyJwt, async (req, res) => {
+            const result = await paymentCollection.find().sort({ date: -1 }).project({ userName: 1, email: 1, date: 1, transactionId: 1, price: 1 }).toArray();
+            // console.log(result);
+            res.send(result)
+        })
+
+
 
 
 
@@ -246,7 +254,7 @@ async function run() {
         app.post('/cart-payments', verifyJwt, async (req, res) => {
             const payment = req.body;
             const insertedResult = await paymentCollection.insertOne(payment);
-            console.log(insertedResult);
+            // console.log(insertedResult);
 
             const query = { _id: new ObjectId(payment.singleDataItems) };
 
