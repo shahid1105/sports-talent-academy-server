@@ -166,7 +166,7 @@ async function run() {
         })
 
 
-        // selected class collection related
+        // selected class collection related api // that means student api
 
         app.get('/class-carts', verifyJwt, async (req, res) => {
             const email = req.query.email;
@@ -202,6 +202,20 @@ async function run() {
             res.send(result)
         })
 
+
+        // enrolled classes api 
+        app.get('/enrolled-classes', verifyJwt, async (req, res) => {
+            const result = await paymentCollection.find().toArray();
+
+            res.send(result)
+        })
+
+
+
+
+
+
+
         // get api for payment component a single data
         app.get("/payment/:id", async (req, res) => {
             const id = req.params.id;
@@ -226,6 +240,20 @@ async function run() {
             res.send({ clientSecret: paymentIntent.client_secret })
         })
 
+
+        // payment related api
+
+        app.post('/cart-payments', verifyJwt, async (req, res) => {
+            const payment = req.body;
+            const insertedResult = await paymentCollection.insertOne(payment);
+            console.log(insertedResult);
+
+            const query = { _id: new ObjectId(payment.singleDataItems) };
+
+            const deleteResult = await selectedClassCollection.deleteOne(query)
+
+            res.send({ insertedResult, deleteResult })
+        })
 
 
 
