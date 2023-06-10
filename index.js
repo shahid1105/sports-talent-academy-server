@@ -78,6 +78,29 @@ async function run() {
         }
 
 
+        //manage classes admin api 
+        app.get('/manage-classes', verifyJwt, verifyAdmin, async (req, res) => {
+            const result = await addAClassCollection.find().toArray();
+            res.send(result)
+        })
+
+        //manage classes update status
+        app.put('/manage-status/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) }
+
+            const updateDoc = {
+                $set: {
+                    status: req.body.role
+                },
+            };
+            const result = await addAClassCollection.updateOne(filter, updateDoc);
+            res.send(result)
+        })
+
+
+
+
 
         // Users Related APIs
 
@@ -86,7 +109,7 @@ async function run() {
             res.send(result)
         })
 
-
+        //user post user collection all users here
         app.post('/users', async (req, res) => {
             const user = req.body;
 
@@ -122,7 +145,7 @@ async function run() {
             const email = req.params.email;
 
             if (req.decoded.email !== email) {
-                res.send({ instructor: false })
+                return res.send({ instructor: false })
 
             }
 
@@ -133,8 +156,15 @@ async function run() {
         })
 
 
+        //users instructors show instructor page
+        app.get('/users/instructors', verifyJwt, async (req, res) => {
+            const query = { role: 'instructor' };
+            const instructors = await usersCollection.find(query).toArray();
+            res.send(instructors);
+        });
 
 
+        // update user role
         app.patch('/users/vip/:id', async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) }
@@ -167,7 +197,20 @@ async function run() {
         })
 
 
+        // my classes get api
+        app.get("/my-classes/:email", verifyJwt, async (req, res) => {
+            const email = req.params.email;
+            const result = await addAClassCollection.find({ instructorEmail: email }).toArray();
 
+            res.send(result)
+        })
+
+
+        //admin api manage classes
+        app.get('/manage-classes', verifyJwt, verifyAdmin, async (req, res) => {
+            const result = await addAClassCollection.find().toArray();
+            res.send(result)
+        })
 
 
 
@@ -182,13 +225,15 @@ async function run() {
         })
 
 
+
+
         // selected class collection related api // that means student api
 
         app.get('/class-carts', verifyJwt, async (req, res) => {
             const email = req.query.email;
 
             if (!email) {
-                res.send([]);
+                return res.send([]);
             }
 
             const decodedEmail = req.decoded.email;
@@ -201,7 +246,7 @@ async function run() {
             res.send(result)
         })
 
-
+        //post select class in selected class collection
         app.post('/class-cart', async (req, res) => {
             const item = req.body;
 
@@ -221,15 +266,41 @@ async function run() {
 
         // enrolled classes api 
         app.get('/enrolled-classes', verifyJwt, async (req, res) => {
-            const result = await paymentCollection.find().toArray();
+            const email = req.query.email;
 
-            res.send(result)
-        })
+            if (!email) {
+                return res.send([]);
+            }
 
+            const decodedEmail = req.decoded.email;
+            if (email !== decodedEmail) {
+                return res.status(403).send({ error: true, message: 'forbidden access' })
+            }
 
-        // payment history api 
+            const query = { email: email };
+            const result = await paymentCollection.find(query).toArray();
+            res.send(result);
+        });
+
+        // payment history get api in payment collection
         app.get('/payment-history', verifyJwt, async (req, res) => {
-            const result = await paymentCollection.find().sort({ date: -1 }).project({ userName: 1, email: 1, date: 1, transactionId: 1, price: 1 }).toArray();
+
+            const email = req.query.email;
+
+            if (!email) {
+                return res.send([]);
+            }
+
+            const decodedEmail = req.decoded.email;
+            if (email !== decodedEmail) {
+                return res.status(403).send({ error: true, message: 'forbidden access' })
+            }
+
+            const query = { email: email };
+
+
+
+            const result = await paymentCollection.find(query).sort({ date: -1 }).project({ userName: 1, email: 1, date: 1, transactionId: 1, price: 1 }).toArray();
             // console.log(result);
             res.send(result)
         })
