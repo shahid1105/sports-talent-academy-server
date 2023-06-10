@@ -57,6 +57,7 @@ async function run() {
         const classesCollection = client.db("sportsDb").collection("classes");
         const selectedClassCollection = client.db("sportsDb").collection("selected-class");
         const paymentCollection = client.db("sportsDb").collection("payments");
+        const addAClassCollection = client.db("sportsDb").collection("add-a-class");
 
         app.post('/jwt', (req, res) => {
             const user = req.body;
@@ -149,15 +150,30 @@ async function run() {
 
 
 
-
-
-
-
         // instructors api
         app.get("/instructors", async (req, res) => {
             const result = await instructorsCollection.find().toArray();
             res.send(result)
         })
+
+
+        // add a class api 
+        app.post('/add-a-class', verifyJwt, async (req, res) => {
+            const addClass = req.body;
+            const result = await addAClassCollection.insertOne(addClass);
+            // console.log(insertedResult);
+
+            res.send(result)
+        })
+
+
+
+
+
+
+
+
+
 
         // classes api
         app.get('/classes', async (req, res) => {
@@ -217,9 +233,6 @@ async function run() {
             // console.log(result);
             res.send(result)
         })
-
-
-
 
 
 
