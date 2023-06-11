@@ -50,7 +50,7 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
+        // await client.connect();
 
         const usersCollection = client.db("sportsDb").collection("users");
         // const instructorsCollection = client.db("sportsDb").collection("instructors");
@@ -92,6 +92,19 @@ async function run() {
             const updateDoc = {
                 $set: {
                     status: req.body.role
+                },
+            };
+            const result = await addAClassCollection.updateOne(filter, updateDoc);
+            res.send(result)
+        })
+
+        app.patch('/manage-feedback/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) }
+
+            const updateDoc = {
+                $set: {
+                    feedback: req.body.feedback
                 },
             };
             const result = await addAClassCollection.updateOne(filter, updateDoc);
@@ -157,7 +170,7 @@ async function run() {
 
 
         //users instructors show instructor page
-        app.get('/users/instructors', verifyJwt, async (req, res) => {
+        app.get('/users/instructors', async (req, res) => {
             const query = { role: 'instructor' };
             const instructors = await usersCollection.find(query).toArray();
             res.send(instructors);
@@ -180,11 +193,6 @@ async function run() {
 
 
 
-        // // instructors api
-        // app.get("/instructors", async (req, res) => {
-        //     const result = await instructorsCollection.find().toArray();
-        //     res.send(result)
-        // })
 
 
         // add a class api 
@@ -242,17 +250,7 @@ async function run() {
         });
 
 
-        // app.patch('/updated-class/:id', async (req, res) => {
-        //     const id = req.params.id;
-        //     const filter = { _id: new ObjectId(id) }
 
-        //     const updateDoc = {
-        //         $set: { availableSeats: availableSeats - 1 }
-        //     };
-
-        //     const result = await addAClassCollection.updateOne(filter, updateDoc);
-        //     res.send(result)
-        // })
 
 
 
@@ -419,8 +417,8 @@ async function run() {
 
 
         // Send a ping to confirm a successful connection
-        await client.db("admin").command({ ping: 1 });
-        console.log("Pinged your deployment. You successfully connected to MongoDB!");
+        // await client.db("admin").command({ ping: 1 });
+        // console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
         // await client.close();
