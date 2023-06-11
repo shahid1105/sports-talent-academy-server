@@ -226,6 +226,36 @@ async function run() {
 
 
 
+        app.patch('/updated-class/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const update = { $inc: { availableSeats: -1, totalEnrolled: 1 } };
+            const option = { upsert: true }
+
+            try {
+                const result = await addAClassCollection.updateOne(filter, update, option);
+                res.send(result);
+            } catch (error) {
+                console.log(error);
+                res.status(500).send({ error: true, message: 'Failed to update class availability.' });
+            }
+        });
+
+
+        // app.patch('/updated-class/:id', async (req, res) => {
+        //     const id = req.params.id;
+        //     const filter = { _id: new ObjectId(id) }
+
+        //     const updateDoc = {
+        //         $set: { availableSeats: availableSeats - 1 }
+        //     };
+
+        //     const result = await addAClassCollection.updateOne(filter, updateDoc);
+        //     res.send(result)
+        // })
+
+
+
 
         // selected class collection related api // that means student api
 
@@ -347,6 +377,37 @@ async function run() {
             })
             res.send({ clientSecret: paymentIntent.client_secret })
         })
+
+
+
+
+
+        // popular classes based on student enrolled
+        app.get("/popular-classes", async (req, res) => {
+            const popularClasses = await addAClassCollection
+                .aggregate([
+                    {
+                        $sort: {
+                            totalEnrolled: -1,
+                        },
+                    },
+                    {
+                        $limit: 6,
+                    },
+                    {
+                        $project: {
+                            _id: 0,
+                            className: 1,
+                            instructorName: 1,
+                            totalEnrolled: 1,
+                            photoURL: 1,
+                        },
+                    },
+                ])
+                .toArray();
+
+            res.json(popularClasses);
+        });
 
 
 
